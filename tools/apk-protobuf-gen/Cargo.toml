@@ -1,0 +1,11 @@
+[package]
+name = "apk-protobuf-gen"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+anyhow = "1.0.86"
+indicatif = "0.17.8"
+regex = "1.10.6"
+walkdir = "2.5.0"
