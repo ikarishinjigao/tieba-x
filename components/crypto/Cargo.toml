@@ -1,0 +1,20 @@
+[package]
+name = "crypto"
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+
+[dependencies]
+base32 = "0.5.1"
+crc32fast = "1.4.2"
+md5 = "0.7.0"
+sha1 = "0.10.6"
+twox-hash = "1.6.3"
+
+[dev-dependencies]
+criterion = "0.5.1"
+rstest = "0.22.0"
+
+[[bench]]
+name = "performance_benchmark"
+harness = false

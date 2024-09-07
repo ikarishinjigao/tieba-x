@@ -6,8 +6,13 @@ edition = "2021"
 [workspace]
 resolver = "2"
 members = [
+    "components/crypto",
+    "components/proto",
     "tools/apk-download",
     "tools/apk-protobuf-gen",
     "tools/protobuf-gen",
     "tools/uniffi-bindgen",
 ]
+
+[workspace.dependencies]
+uniffi = "0.28.1"

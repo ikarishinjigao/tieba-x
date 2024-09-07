@@ -1,8 +1,8 @@
 [package]
-name = "uniffi-bindgen"
+name = "proto"
 version.workspace = true
 authors.workspace = true
 edition.workspace = true
 
 [dependencies]
-uniffi = { workspace = true, features = ["cli"] }
+prost = "0.13.2"

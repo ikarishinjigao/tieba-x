@@ -1,12 +1,12 @@
-use anyhow::Result;
+use anyhow::{Context, Ok, Result};
 use indicatif::{ProgressBar, ProgressStyle};
 use regex::Regex;
 use std::{
+    collections::HashSet,
     env,
     ffi::OsStr,
     fmt, fs,
-    io::Write,
-    ops::Not,
+    io::{BufWriter, Write},
     path::Path,
     process::{Command, Stdio},
 };
@@ -26,62 +26,83 @@ struct Proto {
 struct ProtoField {
     tag: u32,
     name: String,
-    data_type: String,
-    java_type: String,
+    field_type: String,
+    has_dependency: bool,
     repeated: bool,
 }
 
-fn parse_java_class(content: &str) -> Proto {
-    let package_name = extract_package_name(&content);
-    let dependencies = extract_dependencies(&content);
+fn parse_java_class(content: &str, root_path: &Path) -> Result<Proto> {
+    let package_name = extract_package_name(&content)?;
+    let class_name = extract_class_name(content)?;
     let fields = extract_proto_fields(&content);
-    Proto {
+    let mut dependencies = extract_dependencies(&content);
+    let extra_dependencies = fields.iter().filter(|x| x.has_dependency).filter_map(|x| {
+        extract_proto_dependency(root_path, &package_name, &class_name, &x.field_type)
+    });
+    dependencies.extend(extra_dependencies);
+    let mut dependencies = dependencies.into_iter().collect::<Vec<_>>();
+    dependencies.sort();
+    Ok(Proto {
         package_name,
         dependencies,
-        name: extract_class_name(&content),
+        name: class_name,
         fields,
-    }
+    })
 }
 
-fn extract_class_name(content: &str) -> String {
+fn extract_class_name(content: &str) -> Result<String> {
     Regex::new(r"public final class (?<class_name>.+) extends Message \{")
         .unwrap()
         .captures(content)
-        .unwrap()
-        .name("class_name")
-        .unwrap()
-        .as_str()
-        .to_string()
+        .and_then(|c| c.name("class_name"))
+        .map(|m| m.as_str().to_string())
+        .context("Failed to extract calss name")
 }
 
-fn extract_package_name(content: &str) -> String {
+fn extract_package_name(content: &str) -> Result<String> {
     let result = Regex::new(r"package (?<package_name>.+);")
         .unwrap()
         .captures(content)
-        .unwrap()
-        .name("package_name")
-        .map_or("", |m| m.as_str())
-        .to_string();
-    format_package_name(&result)
+        .and_then(|c| c.name("package_name"))
+        .map(|m| m.as_str())
+        .context("Failed to extract package name")?;
+    Ok(format_package_name(&result))
 }
 
-fn extract_dependencies(content: &str) -> Vec<String> {
-    let mut result = Regex::new(r"import (?<dependency>.+);")
+fn extract_dependencies(content: &str) -> HashSet<String> {
+    Regex::new(r"import (?<dependency>.+);")
         .unwrap()
         .captures_iter(content)
         .filter_map(|c| {
-            let dependency = c.name("dependency").unwrap().as_str();
+            let dependency = c.name("dependency")?.as_str();
             if dependency.starts_with("tbclient") {
-                Some(dependency)
+                Some(format_package_name(dependency))
             } else {
                 None
             }
         })
-        .map(|x| format_package_name(x))
-        .filter(|x| EXCLUDE_JAVA_CLASSES.contains(&x.as_str()).not())
-        .collect::<Vec<_>>();
-    result.sort();
-    result
+        .filter(|x| !EXCLUDE_JAVA_CLASSES.contains(&x.as_str()))
+        .collect()
+}
+
+fn extract_proto_dependency(
+    root_path: &Path,
+    package_name: &str,
+    class_name: &str,
+    java_type: &str,
+) -> Option<String> {
+    let java_file = format!("{}.java", java_type);
+    let proto_file_path_from_package = root_path.join(package_name).join(&java_file);
+    let proto_file_path_from_root = root_path.join(&java_file);
+    if class_name == java_type {
+        None
+    } else if !package_name.is_empty() && proto_file_path_from_package.exists() {
+        Some(format!("{}/{}", package_name, java_type))
+    } else if proto_file_path_from_root.exists() {
+        Some(java_type.to_string())
+    } else {
+        None
+    }
 }
 
 fn extract_proto_fields(content: &str) -> Vec<ProtoField> {
@@ -89,15 +110,35 @@ fn extract_proto_fields(content: &str) -> Vec<ProtoField> {
         .unwrap()
         .captures_iter(content)
         .filter_map(|c| {
+            let data_type = c.name("data_type").map_or("", |m| m.as_str()).to_string();
+            let java_type = c.name("java_type").map_or("", |m| m.as_str()).to_string();
+            let repeated =  c.name("label").map_or("", |m| m.as_str()) == "REPEATED";
+            let has_dependency :bool;
+            let field_type = if repeated && data_type.is_empty() {
+                has_dependency = true;
+                Regex::new(r"List<(?<type>.+)>")
+                    .unwrap()
+                    .captures(&java_type)
+                    .and_then(|c| c.name("type"))
+                    .map(|m| m.as_str())
+                    .unwrap_or(&java_type)
+                    .to_string()
+            } else if data_type.is_empty() {
+                has_dependency = true;
+                java_type
+            } else {
+                has_dependency = false;
+                data_type.to_lowercase()
+            };
             Some(ProtoField {
                 tag: c.name("tag").unwrap().as_str().parse().unwrap(),
-                name: c.name("name").unwrap().as_str().to_string(),
-                data_type: c.name("data_type").map_or("", |m| m.as_str()).to_string(),
-                java_type: c.name("java_type").map_or("", |m| m.as_str()).to_string(),
+                name: c.name("name").unwrap().as_str().to_string().to_lowercase(),
+                field_type: field_type.clone(),
+                has_dependency,
                 repeated: c.name("label").map_or("", |m| m.as_str()) == "REPEATED",
             })
         })
-        .filter(|x| EXCLUDE_JAVA_CLASSES.contains(&x.java_type.as_str()).not())
+        .filter(|x| !EXCLUDE_JAVA_CLASSES.contains(&x.field_type.as_str()))
         .collect::<Vec<_>>();
     result.sort_by_key(|x| x.tag);
     result
@@ -128,40 +169,25 @@ fn export_apk_source() -> Result<()> {
 
 fn generate_protobuf_files() -> Result<()> {
     let apk_protobuf_dir = Path::new(env!("TIEBA_APK_SOURCE_EXPORT_DIR")).join("sources/tbclient");
-    let apk_protobuf_dir = apk_protobuf_dir.as_path();
-
     let protobuf_dir = Path::new(env!("TIEBA_APK_PROTOBUF_GEN_DIR"));
     if protobuf_dir.exists() {
         fs::remove_dir_all(protobuf_dir)?;
     }
 
-    let source_files = WalkDir::new(apk_protobuf_dir)
+    let source_files = WalkDir::new(&apk_protobuf_dir)
         .sort_by_file_name()
         .into_iter()
         .filter_map(|e| e.ok())
-        .filter_map(|e| {
-            let path = e.path();
-            if e.file_type().is_file() {
-                if let Some(extension) = path.extension().and_then(OsStr::to_str) {
-                    match extension {
-                        "java" => Some(e),
-                        _ => None,
-                    }
-                } else {
-                    None
-                }
-            } else {
-                None
-            }
-        })
+        .filter(|e| e.file_type().is_file() && e.path().extension() == Some(OsStr::new("java")))
         .collect::<Vec<_>>();
 
-    let progress_bar = create_progress_bar(source_files.len().try_into().unwrap());
-    for entry in source_files {
+    let progress_bar = create_progress_bar(source_files.len() as u64);
+    source_files.iter().try_for_each(|entry| {
         let path = entry.path();
-        let relative_path = path.strip_prefix(apk_protobuf_dir).unwrap();
+        let relative_path = path.strip_prefix(&apk_protobuf_dir).unwrap();
         let mut output_file_path = protobuf_dir.join(relative_path);
         output_file_path.set_extension("proto");
+
         progress_bar.set_message(format!(
             "Generating {}",
             output_file_path
@@ -169,20 +195,19 @@ fn generate_protobuf_files() -> Result<()> {
                 .and_then(OsStr::to_str)
                 .unwrap()
         ));
-        if let Some(extension) = path.extension().and_then(OsStr::to_str) {
-            match extension {
-                "java" => {
-                    let content: String = fs::read_to_string(path)?;
-                    let proto = parse_java_class(&content);
-                    fs::create_dir_all(output_file_path.parent().unwrap())?;
-                    let mut file = fs::File::create(output_file_path)?;
-                    file.write_all(format!("{}", proto).as_bytes())?;
-                    progress_bar.inc(1);
-                }
-                _ => (),
-            }
-        }
-    }
+
+        let content: String = fs::read_to_string(path)?;
+        let proto = parse_java_class(&content, &apk_protobuf_dir)?;
+
+        fs::create_dir_all(output_file_path.parent().unwrap())?;
+        let file = fs::File::create(output_file_path)?;
+        let mut writer = BufWriter::new(file);
+        write!(writer, "{}", proto)?;
+
+        progress_bar.inc(1);
+        Ok(())
+    })?;
+
     progress_bar.finish_with_message("All protobuf files generated successfully.");
 
     Ok(())
@@ -201,26 +226,10 @@ fn create_progress_bar(total_size: u64) -> ProgressBar {
 
 impl fmt::Display for ProtoField {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let field_type: String = if self.repeated {
-            Regex::new(r"List<(?<type>.+)>")
-                .unwrap()
-                .captures(&self.java_type)
-                .unwrap()
-                .name("type")
-                .unwrap()
-                .as_str()
-                .to_string()
-        } else {
-            if self.data_type.is_empty() {
-                self.java_type.clone()
-            } else {
-                self.data_type.to_lowercase()
-            }
-        };
         if self.repeated {
             write!(f, "repeated ")?;
         }
-        write!(f, "{} {} = {};", field_type, self.name, self.tag)
+        write!(f, "{} {} = {};", self.field_type, self.name, self.tag)
     }
 }
 

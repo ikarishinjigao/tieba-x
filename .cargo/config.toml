@@ -6,10 +6,10 @@ TIEBA_APK_DOWNLOAD_URL = { value = "https://tieba.baidu.com/mo/q/activityDiversi
 TIEBA_APK_DOWNLOAD_PATH = { value = ".build/tmp/tieba.apk" }
 TIEBA_APK_SOURCE_EXPORT_DIR = { value = ".build/tmp/sources/tieba" }
 TIEBA_APK_PROTOBUF_GEN_DIR = { value = ".build/tmp/protobuf" }
-
-PROTOBUG_GEN_DIR = { value = ".build/tmp/gen" }
+PROTOBUG_GEN_DIR = { value = "components/proto/src/gen" }
 
 [alias]
 apk-download = ["run", "--package", "apk-download"]
 apk-protobuf-gen = ["run", "--package", "apk-protobuf-gen"]
 protobuf-gen = ["run", "--package", "protobuf-gen"]
+uniffi-bindgen = ["run", "--package", "uniffi-bindgen", "--"]
