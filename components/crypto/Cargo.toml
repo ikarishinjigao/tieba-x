@@ -4,6 +4,9 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 
+[lib]
+crate-type = ["staticlib", "rlib"]
+
 [dependencies]
 base32 = "0.5.1"
 crc32fast = "1.4.2"

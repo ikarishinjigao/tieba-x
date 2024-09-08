@@ -4,5 +4,8 @@ version.workspace = true
 authors.workspace = true
 edition.workspace = true
 
+[lib]
+crate-type = ["staticlib", "rlib"]
+
 [dependencies]
 prost = "0.13.2"
