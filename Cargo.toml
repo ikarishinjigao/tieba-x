@@ -7,6 +7,7 @@ edition = "2021"
 resolver = "2"
 members = [
     "components/crypto",
+    "components/network",
     "components/proto",
     "tools/apk-download",
     "tools/apk-protobuf-gen",

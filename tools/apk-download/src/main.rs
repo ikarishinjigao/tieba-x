@@ -96,6 +96,9 @@ async fn main() -> Result<()> {
     let mut file = File::create(&output_path).await?;
     download_file(&client, real_apk_url, &mut file, &progress_bar).await?;
 
+    let version_file = Path::new(env!("TIEBA_APK_VERSION_PATH"));
+    fs::write(version_file, real_apk_version).context("Unable to save apk version")?;
+
     progress_bar.finish_with_message("Download completed successfully.");
 
     Ok(())

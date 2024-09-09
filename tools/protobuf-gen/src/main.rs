@@ -4,7 +4,7 @@ use walkdir::WalkDir;
 
 fn main() -> Result<()> {
     let protobuf_source_dir = Path::new(env!("TIEBA_APK_PROTOBUF_GEN_DIR"));
-    let protobuf_gen_dir = Path::new(env!("PROTOBUG_GEN_DIR"));
+    let protobuf_gen_dir = Path::new(env!("PROTOBUF_GEN_DIR"));
     if protobuf_gen_dir.exists() {
         fs::remove_dir_all(protobuf_gen_dir)?;
     }
