@@ -1,41 +1,26 @@
 use anyhow::{Context, Result};
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
 use regex::Regex;
-use reqwest::header::LOCATION;
-use reqwest::redirect::Policy;
-use serde_json::Value;
-use std::cmp::min;
-use std::fmt::Write;
-use std::path::Path;
-use std::{env, fs};
-use tokio::fs::File;
-use tokio::io::AsyncWriteExt;
+use reqwest::{header::LOCATION, redirect::Policy, Client};
+use std::{cmp::min, env, fmt::Write, fs, path::Path};
+use tokio::{fs::File, io::AsyncWriteExt};
 
 fn extract_apk_url(content: &str) -> Result<String> {
-    let captures = Regex::new(r"window\.TB_CONFIG = (?<config>.+) \|\| \{};")
-        .unwrap()
+    Regex::new(r#"<a href="(?<url>https://dl.coolapk.com/down\?.+)">"#)?
         .captures(content)
-        .context("Failed to extract APK URL")?;
-    let config_json = captures
-        .name("config")
-        .context("Failed to extract config JSON")?
-        .as_str();
-    let config: Value = serde_json::from_str(config_json)?;
-    config["androidUrls"]["pc_login"]
-        .as_str()
-        .map(String::from)
-        .context("Failed to extract APK URL from config")
+        .and_then(|c| c.name("url").map(|m| m.as_str().to_string()))
+        .context("Failed to extract APK URL")
 }
 
 fn extract_apk_version(content: &str) -> Result<String> {
     Regex::new(r"(?<version>\d+\.\d+\.\d+\.\d+)")?
         .captures(content)
-        .and_then(|cap| cap.name("version").map(|m| m.as_str().to_string()))
+        .and_then(|c| c.name("version").map(|m| m.as_str().to_string()))
         .context("Failed to extract APK version")
 }
 
 fn create_progress_bar(total_size: u64, version: &str) -> ProgressBar {
-    let progress_bar_style = ProgressStyle::with_template(
+    let pb_style = ProgressStyle::with_template(
         "{msg}\n{spinner:.green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {bytes}/{total_bytes} ({eta})"
     )
     .unwrap()
@@ -44,7 +29,7 @@ fn create_progress_bar(total_size: u64, version: &str) -> ProgressBar {
     })
     .progress_chars("#>-");
     let pb = ProgressBar::new(total_size);
-    pb.set_style(progress_bar_style);
+    pb.set_style(pb_style);
     pb.set_message(format!("Downloading {} APK...", version));
     pb
 }
@@ -70,8 +55,10 @@ async fn download_file(
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    let client = reqwest::Client::builder()
+    let client = Client::builder()
         .redirect(Policy::none())
+        .cookie_store(true)
+        .user_agent("Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36 Edg/128.0.0.0'")
         .build()?;
 
     let output_path = Path::new(env!("TIEBA_APK_DOWNLOAD_PATH"));
@@ -89,7 +76,7 @@ async fn main() -> Result<()> {
         .to_str()?;
     let real_apk_version = extract_apk_version(real_apk_url)?;
 
-    let response = client.get(real_apk_url).send().await?;
+    let response = Client::new().get(real_apk_url).send().await?;
     let total_size = response.content_length().context("No content length")?;
     let progress_bar = create_progress_bar(total_size, &real_apk_version);
 

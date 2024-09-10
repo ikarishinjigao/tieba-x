@@ -155,6 +155,9 @@ fn format_package_name(source: &str) -> String {
 fn export_apk_source() -> Result<()> {
     let apk_path = Path::new(env!("TIEBA_APK_DOWNLOAD_PATH"));
     let output_path = Path::new(env!("TIEBA_APK_SOURCE_EXPORT_DIR"));
+    if output_path.exists() {
+        fs::remove_dir_all(output_path)?;
+    }
     Command::new("jadx")
         .arg("--rename-flags")
         .arg("none")
