@@ -34,25 +34,6 @@ fn create_progress_bar(total_size: u64, version: &str) -> ProgressBar {
     pb
 }
 
-async fn download_file(
-    client: &reqwest::Client,
-    url: &str,
-    file: &mut File,
-    pb: &ProgressBar,
-) -> Result<()> {
-    let mut response = client.get(url).send().await?;
-    let mut downloaded: u64 = 0;
-
-    while let Some(chunk) = response.chunk().await? {
-        file.write_all(&chunk).await?;
-        let new = min(downloaded + (chunk.len() as u64), pb.length().unwrap_or(0));
-        downloaded = new;
-        pb.set_position(new);
-    }
-
-    Ok(())
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     let client = Client::builder()
@@ -76,17 +57,23 @@ async fn main() -> Result<()> {
         .to_str()?;
     let real_apk_version = extract_apk_version(real_apk_url)?;
 
-    let response = Client::new().get(real_apk_url).send().await?;
+    let mut response = Client::new().get(real_apk_url).send().await?;
     let total_size = response.content_length().context("No content length")?;
-    let progress_bar = create_progress_bar(total_size, &real_apk_version);
+    let pb = create_progress_bar(total_size, &real_apk_version);
 
     let mut file = File::create(&output_path).await?;
-    download_file(&client, real_apk_url, &mut file, &progress_bar).await?;
+    let mut downloaded: u64 = 0;
+    while let Some(chunk) = response.chunk().await? {
+        file.write_all(&chunk).await?;
+        let new = min(downloaded + (chunk.len() as u64), pb.length().unwrap_or(0));
+        downloaded = new;
+        pb.set_position(new);
+    }
 
     let version_file = Path::new(env!("TIEBA_APK_VERSION_PATH"));
     fs::write(version_file, real_apk_version).context("Unable to save apk version")?;
 
-    progress_bar.finish_with_message("Download completed successfully.");
+    pb.finish_with_message("Download completed successfully.");
 
     Ok(())
 }

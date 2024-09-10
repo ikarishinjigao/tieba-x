@@ -17,3 +17,8 @@ members = [
 
 [workspace.dependencies]
 uniffi = "0.28.1"
+
+[profile.release]
+opt-level = "s"
+debug = false
+lto = true
