@@ -4,7 +4,7 @@ use crate::{
 };
 use proto::frs_page::{DataReq, FrsPageReqIdl, FrsPageResIdl};
 
-#[derive(Debug)]
+#[derive(Debug, uniffi::Record)]
 pub struct GetThreadsRequest {
     pub forum_name: String,
     pub page_number: i32,

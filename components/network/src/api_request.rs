@@ -4,7 +4,7 @@ use reqwest::{
     Method,
 };
 
-pub trait ApiProtobufRequest
+pub trait ApiProtobufRequest: Send + Sync
 where
     Self::ProtobufRequest: Message + Default + Clone,
     Self::ProtobufResponse: Message + Default + Clone,

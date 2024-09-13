@@ -5,12 +5,20 @@ authors.workspace = true
 edition.workspace = true
 
 [lib]
-crate-type = ["staticlib", "rlib"]
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
 proto = { path = "../proto" }
-reqwest = { version = "0.12.7", features = ["multipart", "gzip"] }
+reqwest = { version = "0.12.7", features = [
+    "multipart",
+    "gzip",
+    "native-tls-vendored",
+] }
 thiserror = "1.0.63"
+uniffi = { workspace = true, features = [
+    "tokio",
+    "scaffolding-ffi-buffer-fns",
+] }
 
 [dev-dependencies]
 tokio = { version = "1.40.0", features = ["full"] }

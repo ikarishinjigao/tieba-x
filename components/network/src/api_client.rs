@@ -3,14 +3,16 @@ use crate::{ApiProtobufRequest, Error};
 use proto::Message;
 use reqwest::multipart::Form;
 use reqwest::multipart::Part;
-use reqwest::{Client, Url};
+use reqwest::{Client, Response, Url};
 
-#[derive(Debug)]
+#[derive(Debug, uniffi::Object)]
 pub struct ApiClient {
     client: Client,
 }
 
+#[uniffi::export]
 impl Default for ApiClient {
+    #[uniffi::constructor]
     fn default() -> Self {
         Self {
             client: Client::new(),
@@ -36,7 +38,9 @@ impl ApiClient {
             let mut protobuf_request_buf = vec![];
             protobuf_request
                 .encode(&mut protobuf_request_buf)
-                .map_err(|e| Error::Encode(e))?;
+                .map_err(|e| Error::Encode {
+                    message: e.to_string(),
+                })?;
 
             let part = Part::bytes(protobuf_request_buf).file_name("data");
             Form::new().part("data", part)
@@ -50,15 +54,23 @@ impl ApiClient {
             .multipart(form)
             .send()
             .await
-            .map_err(|e| Error::Client(e))?;
+            .map_err(|e| Error::Client {
+                message: e.to_string(),
+            })?;
 
         if !response.status().is_success() {
-            return Err(Error::UnexpectedStatusCode(response));
+            return Err(Error::UnexpectedStatusCode(
+                Response::status(&response).into(),
+            ));
         }
 
         let protobuf_response = {
-            let body = response.bytes().await.map_err(|e| Error::Client(e))?;
-            ApiRequest::ProtobufResponse::decode(body).map_err(|e| Error::Decode(e))?
+            let body = response.bytes().await.map_err(|e| Error::Client {
+                message: e.to_string(),
+            })?;
+            ApiRequest::ProtobufResponse::decode(body).map_err(|e| Error::Decode {
+                message: e.to_string(),
+            })?
         };
         let protobuf_error = api_request.to_error(protobuf_response.clone());
         let api_error = ApiError {

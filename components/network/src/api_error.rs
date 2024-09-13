@@ -1,4 +1,4 @@
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, uniffi::Record)]
 #[error("{:#?}", 0)]
 pub struct ApiError {
     pub error_code: i32,

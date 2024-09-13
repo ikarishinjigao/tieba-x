@@ -1,16 +1,16 @@
-#[derive(thiserror::Error, Debug)]
+#[derive(thiserror::Error, Debug, uniffi::Error)]
 pub enum Error {
-    #[error("Client error: {0}")]
-    Client(#[from] reqwest::Error),
+    #[error("Client error: {message}")]
+    Client { message: String },
 
-    #[error("Protobuf encode error: {0}")]
-    Encode(#[from] proto::EncodeError),
+    #[error("Protobuf encode error: {message}")]
+    Encode { message: String },
 
-    #[error("Protobuf decode error: {0}")]
-    Decode(#[from] proto::DecodeError),
+    #[error("Protobuf decode error: {message}")]
+    Decode { message: String },
 
-    #[error("Unexpected status code {}", reqwest::Response::status(.0))]
-    UnexpectedStatusCode(reqwest::Response),
+    #[error("Unexpected status code: {0}")]
+    UnexpectedStatusCode(u16),
 
     #[error("API error: {0}")]
     Api(#[from] crate::api_error::ApiError),
