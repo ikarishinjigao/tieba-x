@@ -5,6 +5,6 @@ authors.workspace = true
 edition.workspace = true
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.89"
 prost-build = "0.13.2"
 walkdir = "2.5.0"

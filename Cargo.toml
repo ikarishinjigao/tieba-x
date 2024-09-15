@@ -14,6 +14,11 @@ members = [
     "tools/protobuf-gen",
     "tools/uniffi-bindgen",
 ]
+default-members = [
+    "components/crypto",
+    "components/network",
+    "components/proto",
+]
 
 [workspace.dependencies]
 uniffi = "0.28.1"
