@@ -5,7 +5,7 @@ authors.workspace = true
 edition.workspace = true
 
 [lib]
-crate-type = ["staticlib", "cdylib", "rlib"]
+crate-type = ["staticlib", "rlib"]
 
 [dependencies]
 proto = { path = "../proto" }
@@ -19,6 +19,6 @@ uniffi = { workspace = true, features = [
     "tokio",
     "scaffolding-ffi-buffer-fns",
 ] }
-
-[dev-dependencies]
+bytes = "1.0"
 tokio = { version = "1.40.0", features = ["full"] }
+stacker = "0.1"

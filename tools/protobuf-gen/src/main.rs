@@ -20,7 +20,6 @@ fn main() -> Result<()> {
 
     let mut config = prost_build::Config::new();
     config.out_dir(protobuf_gen_dir);
-    config.compile_well_known_types();
     config.default_package_filename("shared");
     config.include_file("_include.rs");
     config.compile_protos(&files, &[protobuf_source_dir])?;

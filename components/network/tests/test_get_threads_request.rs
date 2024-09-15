@@ -2,7 +2,7 @@ use network::{ApiClient, GetThreadsRequest};
 
 #[tokio::test]
 async fn test_get_threads_request() {
-    let client = ApiClient::default();
+    let client = ApiClient::new();
 
     let reuqest = GetThreadsRequest {
         forum_name: "amd".to_owned(),

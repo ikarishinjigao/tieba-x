@@ -1,4 +1,4 @@
-uniffi::setup_scaffolding!();
+uniffi::setup_scaffolding!("TiebaxNetwork");
 
 mod api_client;
 mod api_error;

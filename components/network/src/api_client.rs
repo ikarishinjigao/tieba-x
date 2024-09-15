@@ -3,7 +3,7 @@ use crate::{ApiProtobufRequest, Error};
 use proto::Message;
 use reqwest::multipart::Form;
 use reqwest::multipart::Part;
-use reqwest::{Client, Response, Url};
+use reqwest::{Client, Response, StatusCode, Url};
 
 #[derive(Debug, uniffi::Object)]
 pub struct ApiClient {
@@ -11,11 +11,11 @@ pub struct ApiClient {
 }
 
 #[uniffi::export]
-impl Default for ApiClient {
+impl ApiClient {
     #[uniffi::constructor]
-    fn default() -> Self {
+    pub fn new() -> Self {
         Self {
-            client: Client::new(),
+            client: Client::builder().gzip(true).build().unwrap(),
         }
     }
 }
@@ -41,7 +41,6 @@ impl ApiClient {
                 .map_err(|e| Error::Encode {
                     message: e.to_string(),
                 })?;
-
             let part = Part::bytes(protobuf_request_buf).file_name("data");
             Form::new().part("data", part)
         };
@@ -58,30 +57,33 @@ impl ApiClient {
                 message: e.to_string(),
             })?;
 
-        if !response.status().is_success() {
-            return Err(Error::UnexpectedStatusCode(
+        match response.status() {
+            StatusCode::OK => {
+                let protobuf_response = {
+                    let body = response.bytes().await.map_err(|e| Error::Client {
+                        message: e.to_string(),
+                    })?;
+                    stacker::grow(8 * 1024 * 1024, || {
+                        ApiRequest::ProtobufResponse::decode(body).map_err(|e| Error::Decode {
+                            message: e.to_string(),
+                        })
+                    })?
+                };
+                let protobuf_error = api_request.to_error(&protobuf_response);
+                let api_error = ApiError {
+                    error_code: protobuf_error.errorno,
+                    error_message: protobuf_error.errmsg,
+                    user_message: protobuf_error.usermsg,
+                };
+                if api_error.error_code != 0 {
+                    Err(Error::Api(api_error))
+                } else {
+                    Ok(api_request.to_response(&protobuf_response))
+                }
+            }
+            _ => Err(Error::UnexpectedStatusCode(
                 Response::status(&response).into(),
-            ));
-        }
-
-        let protobuf_response = {
-            let body = response.bytes().await.map_err(|e| Error::Client {
-                message: e.to_string(),
-            })?;
-            ApiRequest::ProtobufResponse::decode(body).map_err(|e| Error::Decode {
-                message: e.to_string(),
-            })?
-        };
-        let protobuf_error = api_request.to_error(protobuf_response.clone());
-        let api_error = ApiError {
-            error_code: protobuf_error.errorno,
-            error_message: protobuf_error.errmsg,
-            user_message: protobuf_error.usermsg,
-        };
-        if api_error.error_code != 0 {
-            Err(Error::Api(api_error))
-        } else {
-            Ok(api_request.to_response(protobuf_response))
+            )),
         }
     }
 }

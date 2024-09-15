@@ -53,16 +53,18 @@ impl ApiProtobufRequest for GetThreadsRequest {
         }
     }
 
-    fn to_error(&self, protobuf_response: Self::ProtobufResponse) -> proto::Error {
-        protobuf_response.error.unwrap_or_default()
+    fn to_error(&self, protobuf_response: &Self::ProtobufResponse) -> proto::Error {
+        protobuf_response.error.clone().unwrap_or_default()
     }
 
-    fn to_response(&self, protobuf_response: Self::ProtobufResponse) -> Self::Response {
-        let data = protobuf_response.data.unwrap_or_default();
-        let forum = data.forum.unwrap_or_default();
+    fn to_response(&self, protobuf_response: &Self::ProtobufResponse) -> Self::Response {
+        let forum = protobuf_response
+            .data
+            .as_ref()
+            .and_then(|x| x.forum.as_ref());
         Self::Response {
-            forum_id: forum.id,
-            forum_name: forum.name,
+            forum_id: forum.and_then(|x| Some(x.id)).unwrap_or_default(),
+            forum_name: forum.and_then(|x| Some(x.name.clone())).unwrap_or_default(),
         }
     }
 }

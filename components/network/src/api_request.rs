@@ -6,8 +6,8 @@ use reqwest::{
 
 pub trait ApiProtobufRequest: Send + Sync
 where
-    Self::ProtobufRequest: Message + Default + Clone,
-    Self::ProtobufResponse: Message + Default + Clone,
+    Self::ProtobufRequest: Message + Default,
+    Self::ProtobufResponse: Message + Default,
 {
     type ProtobufRequest;
     type ProtobufResponse;
@@ -35,6 +35,6 @@ where
     }
 
     fn to_protobuf_request(&self) -> Self::ProtobufRequest;
-    fn to_error(&self, protobuf_response: Self::ProtobufResponse) -> proto::Error;
-    fn to_response(&self, protobuf_response: Self::ProtobufResponse) -> Self::Response;
+    fn to_error(&self, protobuf_response: &Self::ProtobufResponse) -> proto::Error;
+    fn to_response(&self, protobuf_response: &Self::ProtobufResponse) -> Self::Response;
 }

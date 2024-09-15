@@ -3,3 +3,6 @@
 
 # generated
 **/gen
+
+# platform
+platforms/apple
