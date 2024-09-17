@@ -133,7 +133,7 @@ fn extract_proto_fields(content: &str) -> Vec<ProtoField> {
             Some(ProtoField {
                 tag: c.name("tag").unwrap().as_str().parse().unwrap(),
                 name: c.name("name").unwrap().as_str().to_string().to_lowercase(),
-                field_type: field_type.clone(),
+                field_type,
                 has_dependency,
                 repeated: c.name("label").map_or("", |m| m.as_str()) == "REPEATED",
             })

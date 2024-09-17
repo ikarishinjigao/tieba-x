@@ -5,7 +5,7 @@ authors.workspace = true
 edition.workspace = true
 
 [lib]
-crate-type = ["staticlib", "rlib"]
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
 prost = "0.13.2"
