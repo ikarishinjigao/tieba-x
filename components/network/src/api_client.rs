@@ -39,7 +39,7 @@ impl ApiClient {
             protobuf_request
                 .encode(&mut protobuf_request_buf)
                 .map_err(|e| Error::Encode {
-                    message: e.to_string(),
+                    error_message: e.to_string(),
                 })?;
             let part = Part::bytes(protobuf_request_buf).file_name("data");
             Form::new().part("data", part)
@@ -54,18 +54,18 @@ impl ApiClient {
             .send()
             .await
             .map_err(|e| Error::Client {
-                message: e.to_string(),
+                error_message: e.to_string(),
             })?;
 
         match response.status() {
             StatusCode::OK => {
                 let protobuf_response = {
                     let body = response.bytes().await.map_err(|e| Error::Client {
-                        message: e.to_string(),
+                        error_message: e.to_string(),
                     })?;
                     stacker::grow(8 * 1024 * 1024, || {
                         ApiRequest::ProtobufResponse::decode(body).map_err(|e| Error::Decode {
-                            message: e.to_string(),
+                            error_message: e.to_string(),
                         })
                     })?
                 };
@@ -76,14 +76,14 @@ impl ApiClient {
                     user_message: protobuf_error.usermsg,
                 };
                 if api_error.error_code != 0 {
-                    Err(Error::Api(api_error))
+                    Err(Error::Api { api_error })
                 } else {
                     Ok(api_request.to_response(&protobuf_response))
                 }
             }
-            _ => Err(Error::UnexpectedStatusCode(
-                Response::status(&response).into(),
-            )),
+            _ => Err(Error::UnexpectedStatusCode {
+                status_code: Response::status(&response).into(),
+            }),
         }
     }
 }

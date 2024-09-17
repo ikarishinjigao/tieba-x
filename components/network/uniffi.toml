@@ -1,2 +1,6 @@
 [bindings.swift]
 cdylib_name = "TiebaxNetwork"
+
+[bindings.kotlin]
+package_name = "cc.ikarishinjigao.tiebax.core.network"
+android = true
