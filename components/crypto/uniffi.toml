@@ -1,8 +1,8 @@
 [bindings.swift]
 ffi_module_name = "TiebaxCore"
-ffi_module_filename = "NetworkFFI"
+ffi_module_filename = "CryptoFFI"
 generate_module_map = false
 
 [bindings.kotlin]
-package_name = "cc.ikarishinjigao.tiebax.core.network"
+package_name = "cc.ikarishinjigao.tiebax.core.crypto"
 android = true

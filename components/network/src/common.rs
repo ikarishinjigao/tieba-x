@@ -1,10 +1,12 @@
-pub struct CommonRequest(pub proto::CommonReq);
+use crate::protos::CommonReq;
+
+pub struct CommonRequest(pub CommonReq);
 
 impl Default for CommonRequest {
     fn default() -> Self {
-        Self(proto::CommonReq {
+        Self(CommonReq {
             client_type: 2,
-            client_version: proto::TIEBA_CLIENT_VERSION.to_owned(),
+            client_version: crate::protos::TIEBA_CLIENT_VERSION.to_owned(),
             ..Default::default()
         })
     }

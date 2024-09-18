@@ -8,13 +8,13 @@ edition.workspace = true
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [dependencies]
-proto = { path = "../proto" }
+thiserror = "1.0.63"
+prost = "0.13.2"
 reqwest = { version = "0.12.7", features = [
     "multipart",
     "gzip",
     "native-tls-vendored",
 ] }
-thiserror = "1.0.63"
 uniffi = { workspace = true, features = [
     "tokio",
     "scaffolding-ffi-buffer-fns",

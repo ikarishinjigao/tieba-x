@@ -1,4 +1,5 @@
-use proto::Message;
+use crate::protos::Error;
+use prost::Message;
 use reqwest::{
     header::{HeaderMap, CACHE_CONTROL, CONNECTION, USER_AGENT},
     Method,
@@ -25,7 +26,7 @@ where
         headers.insert("x_bd_data_type", "protobuf".parse().unwrap());
         headers.insert(
             USER_AGENT,
-            format!("tieba/{}", proto::TIEBA_CLIENT_VERSION)
+            format!("tieba/{}", crate::protos::TIEBA_CLIENT_VERSION)
                 .parse()
                 .unwrap(),
         );
@@ -35,6 +36,6 @@ where
     }
 
     fn to_protobuf_request(&self) -> Self::ProtobufRequest;
-    fn to_error(&self, protobuf_response: &Self::ProtobufResponse) -> proto::Error;
+    fn to_error(&self, protobuf_response: &Self::ProtobufResponse) -> Error;
     fn to_response(&self, protobuf_response: &Self::ProtobufResponse) -> Self::Response;
 }

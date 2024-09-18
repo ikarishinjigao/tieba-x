@@ -7,7 +7,7 @@ TIEBA_APK_DOWNLOAD_PATH = { value = ".build/tmp/tieba.apk" }
 TIEBA_APK_VERSION_PATH = { value = ".build/tmp/version" }
 TIEBA_APK_SOURCE_EXPORT_DIR = { value = ".build/tmp/sources/tieba" }
 TIEBA_APK_PROTOBUF_GEN_DIR = { value = ".build/tmp/protobuf" }
-PROTOBUF_GEN_DIR = { value = "components/proto/src/gen" }
+PROTOBUF_GEN_DIR = { value = "components/network/src/protos" }
 
 [alias]
 apk-download = ["run", "--package", "apk-download"]

@@ -11,6 +11,15 @@ pub struct HeliosHasher {
     buffer: [u8; BUFFER_SIZE],
 }
 
+impl Default for HeliosHasher {
+    fn default() -> Self {
+        Self {
+            state: [0xFFu8; STATE_SIZE],
+            buffer: [0xFFu8; BUFFER_SIZE],
+        }
+    }
+}
+
 impl HeliosHasher {
     #[inline(always)]
     pub fn hash(&mut self, bytes: &[u8]) -> String {
@@ -56,15 +65,6 @@ impl HeliosHasher {
         self.state
             .copy_from_slice(&updated_state.to_le_bytes()[0..STATE_SIZE]);
         self.buffer[buffer_offset..buffer_offset + STATE_SIZE].copy_from_slice(&self.state);
-    }
-}
-
-impl Default for HeliosHasher {
-    fn default() -> Self {
-        Self {
-            state: [0xFFu8; STATE_SIZE],
-            buffer: [0xFFu8; BUFFER_SIZE],
-        }
     }
 }
 

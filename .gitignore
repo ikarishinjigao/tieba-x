@@ -2,7 +2,7 @@
 .build
 
 # generated
-**/gen
+**/protos
 
 # platform
 platforms/apple

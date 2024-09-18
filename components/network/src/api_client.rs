@@ -1,9 +1,12 @@
-use crate::api_error::ApiError;
-use crate::{ApiProtobufRequest, Error};
-use proto::Message;
-use reqwest::multipart::Form;
-use reqwest::multipart::Part;
-use reqwest::{Client, Response, StatusCode, Url};
+use crate::{
+    api_error::ApiError, api_request::ApiProtobufRequest, error::Error,
+    requests::GetThreadsRequest, responses::GetThreadsResponse,
+};
+use prost::Message;
+use reqwest::{
+    multipart::{Form, Part},
+    Client, Response, StatusCode, Url,
+};
 
 #[derive(Debug, uniffi::Object)]
 pub struct ApiClient {
@@ -20,8 +23,18 @@ impl ApiClient {
     }
 }
 
+#[uniffi::export(async_runtime = "tokio")]
 impl ApiClient {
-    pub async fn request<ApiRequest>(
+    pub async fn get_threads(
+        &self,
+        request: GetThreadsRequest,
+    ) -> Result<GetThreadsResponse, Error> {
+        self.request(request).await
+    }
+}
+
+impl ApiClient {
+    async fn request<ApiRequest>(
         &self,
         api_request: ApiRequest,
     ) -> Result<ApiRequest::Response, Error>

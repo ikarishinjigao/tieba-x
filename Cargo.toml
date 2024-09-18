@@ -6,19 +6,15 @@ edition = "2021"
 [workspace]
 resolver = "2"
 members = [
+    "components/core",
     "components/crypto",
     "components/network",
-    "components/proto",
     "tools/apk-download",
     "tools/apk-protobuf-gen",
     "tools/protobuf-gen",
     "tools/uniffi-bindgen",
 ]
-default-members = [
-    "components/crypto",
-    "components/network",
-    "components/proto",
-]
+default-members = ["components/core", "components/crypto", "components/network"]
 
 [workspace.dependencies]
 uniffi = "0.28.1"

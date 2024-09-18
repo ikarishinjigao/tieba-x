@@ -1,8 +1,11 @@
 use crate::{
-    api_request::ApiProtobufRequest, common::CommonRequest, enums::ThreadSortType,
+    api_request::ApiProtobufRequest,
+    common::CommonRequest,
+    enums::ThreadSortType,
+    protos::frs_page::{DataReq, FrsPageReqIdl, FrsPageResIdl},
+    protos::Error,
     responses::GetThreadsResponse,
 };
-use proto::frs_page::{DataReq, FrsPageReqIdl, FrsPageResIdl};
 
 #[derive(Clone, Debug, uniffi::Record)]
 pub struct GetThreadsRequest {
@@ -53,7 +56,7 @@ impl ApiProtobufRequest for GetThreadsRequest {
         }
     }
 
-    fn to_error(&self, protobuf_response: &Self::ProtobufResponse) -> proto::Error {
+    fn to_error(&self, protobuf_response: &Self::ProtobufResponse) -> Error {
         protobuf_response.error.clone().unwrap_or_default()
     }
 

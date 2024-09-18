@@ -1,5 +1,8 @@
+uniffi::setup_scaffolding!("Crypto");
+
 mod cuid;
 mod helios;
 
-pub use cuid::*;
 use helios::HeliosHasher;
+
+pub use cuid::Cuid;
