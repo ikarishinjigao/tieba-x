@@ -6,4 +6,5 @@
 
 # platform
 platforms/apple
-platforms/android
+platforms/android/*
+!platforms/android/app/

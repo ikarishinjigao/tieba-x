@@ -1,0 +1,38 @@
+# Built application files
+*.apk
+*.ap_
+
+# VM files
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+out/
+build/
+.kotlin/
+
+# FFI files
+*.so
+**/Crypto.kt
+**/Network.kt
+
+# Local configuration files
+local.properties
+
+# Android Studio project files
+.idea/*
+!/.idea/codeStyles
+/.idea/codeStyles/*
+!/.idea/codeStyles/Project.xml
+!/.idea/codeStyles/codeStyleConfig.xml
+!/.idea/inspectionProfiles/Project_Default.xml
+
+# Gradle cache
+.gradle
+
+# Credentials
+credentials/*
+!credentials/.gitkeep
