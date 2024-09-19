@@ -20,6 +20,8 @@ default-members = ["components/core", "components/crypto", "components/network"]
 uniffi = "0.28.1"
 
 [profile.release]
-opt-level = "s"
+opt-level = "z"
 debug = true
 lto = true
+codegen-units = 1
+panic = "abort"

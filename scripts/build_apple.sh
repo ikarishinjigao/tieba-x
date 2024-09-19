@@ -21,30 +21,30 @@ NC='\033[0m' # No Color
 
 # Function to print colored output
 print_colored() {
-    local color=$1
-    local message=$2
-    echo -e "${color}${message}${NC}"
+  local color=$1
+  local message=$2
+  echo -e "${color}${message}${NC}"
 }
 
 # Function to check if a command exists
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+  command -v "$1" >/dev/null 2>&1
 }
 
 # Check for required tools
 for tool in cargo xcodebuild; do
-    if ! command_exists $tool; then
-        print_colored $RED "Error: $tool is not installed. Please install it and try again."
-        exit 1
-    fi
+  if ! command_exists $tool; then
+    print_colored $RED "Error: $tool is not installed. Please install it and try again."
+    exit 1
+  fi
 done
 
 # Function to run a command with error handling
 run_command() {
-    if ! "$@"; then
-        print_colored $RED "Error: Command failed: $*"
-        exit 1
-    fi
+  if ! "$@"; then
+    print_colored $RED "Error: Command failed: $*"
+    exit 1
+  fi
 }
 
 # Clean build directories
@@ -69,13 +69,13 @@ cp $GEN_DIR/*.swift $SOURCES_PATH/
 
 # Function to create framework
 create_framework() {
-    local platform=$1
-    local framework_path="$FRAMEWORKS_PATH/$platform/$FRAMEWORK_NAME.framework"
-    print_colored $YELLOW "Creating framework for $platform..."
-    mkdir -p "$framework_path/Modules" "$framework_path/Headers"
-    cp $BUILD_DIR/$platform/release/libtiebax_core.a "$framework_path/$FRAMEWORK_NAME"
-    cp $COMMON_DIR/{module.modulemap,$FRAMEWORK_NAME.h,Info.plist} "$framework_path"
-    cp $GEN_DIR/*FFI.h "$framework_path/Headers"
+  local platform=$1
+  local framework_path="$FRAMEWORKS_PATH/$platform/$FRAMEWORK_NAME.framework"
+  print_colored $YELLOW "Creating framework for $platform..."
+  mkdir -p "$framework_path/Modules" "$framework_path/Headers"
+  cp $BUILD_DIR/$platform/release/libtiebax_core.a "$framework_path/$FRAMEWORK_NAME"
+  cp $COMMON_DIR/{module.modulemap,$FRAMEWORK_NAME.h,Info.plist} "$framework_path"
+  cp $GEN_DIR/*FFI.h "$framework_path/Headers"
 }
 
 # Create frameworks
