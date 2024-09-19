@@ -1,5 +1,4 @@
 import cc.ikarishinjigao.tiebax.Version
-import cc.ikarishinjigao.tiebax.configureFlavors
 import cc.ikarishinjigao.tiebax.configureKotlinAndroid
 import cc.ikarishinjigao.tiebax.libs
 import com.android.build.api.dsl.ApplicationExtension
@@ -17,7 +16,6 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
       extensions.configure<ApplicationExtension> {
         configureKotlinAndroid(this)
-        configureFlavors(this)
         defaultConfig.targetSdk = Version.Android.TARGET_SDK
       }
     }

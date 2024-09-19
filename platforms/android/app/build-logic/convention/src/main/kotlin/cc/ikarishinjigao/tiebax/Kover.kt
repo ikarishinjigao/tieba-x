@@ -14,18 +14,11 @@ import org.gradle.kotlin.dsl.withType
 
 internal object KoverConfig {
   const val AGGREGATED_VARIANT_NAME = "aggregated"
-  const val REPORT_VARIANT_NAME = "productionDebug"
+  const val REPORT_VARIANT_NAME = "debug"
 
-  val excludePackages = listOf(
-    "dagger",
-    "hilt_aggregated_deps",
-    "*.protobuf",
-    "*.protobuf.*",
-  )
+  val excludePackages = listOf<String>()
 
   val excludeClasses = listOf(
-    "*_MembersInjector*",
-    "*_Provide*Factory*",
     "*ComposableSingletons\$*",
   )
 }

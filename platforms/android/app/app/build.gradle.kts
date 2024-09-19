@@ -1,5 +1,6 @@
 import cc.ikarishinjigao.tiebax.TiebaxBuildType
 import cc.ikarishinjigao.tiebax.Version
+import java.util.Properties
 
 plugins {
   alias(libs.plugins.tiebax.android.application)
@@ -19,6 +20,22 @@ android {
 
     vectorDrawables {
       useSupportLibrary = true
+    }
+  }
+
+  signingConfigs {
+    val credentialProperties =
+      Properties().apply {
+        load(project.rootProject.file("credentials/credential.properties").inputStream())
+      }
+    getByName("debug") {
+      storeFile = file("$rootDir/credentials/debug.keystore")
+    }
+    create("release") {
+      storeFile = file("$rootDir/credentials/release.keystore")
+      storePassword = credentialProperties.getProperty("RELEASE_STORE_PASSWORD")
+      keyAlias = credentialProperties.getProperty("RELEASE_KEY_ALIAS")
+      keyPassword = credentialProperties.getProperty("RELEASE_KEY_PASSWORD")
     }
   }
 
@@ -58,7 +75,6 @@ dependencies {
   implementation(projects.core.network)
 
   implementation(libs.androidx.activity.compose)
-  implementation(libs.androidx.compose.material.icons.extended)
   implementation(libs.androidx.compose.material3)
   implementation(libs.androidx.navigation.compose)
 

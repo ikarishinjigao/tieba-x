@@ -1,4 +1,3 @@
-import cc.ikarishinjigao.tiebax.configureFlavors
 import cc.ikarishinjigao.tiebax.configureGradleManagedDevices
 import cc.ikarishinjigao.tiebax.configureKotlinAndroid
 import cc.ikarishinjigao.tiebax.disableUnnecessaryAndroidTests
@@ -20,7 +19,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
 
       extensions.configure<LibraryExtension> {
         configureKotlinAndroid(this)
-        configureFlavors(this)
         configureGradleManagedDevices(this)
       }
 
