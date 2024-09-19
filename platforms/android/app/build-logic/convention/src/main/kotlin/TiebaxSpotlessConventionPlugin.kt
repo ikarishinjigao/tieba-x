@@ -16,12 +16,16 @@ class TiebaxSpotlessConventionPlugin : Plugin<Project> {
           extensions.configure<SpotlessExtension> {
             kotlin {
               target("**/*.kt")
-              targetExclude("**/build/**/*.kt")
+              targetExclude(
+                "**/build/**/*.kt",
+                "**/Crypto.kt",
+                "**/Network.kt",
+              )
               ktlint(libs.findVersion("ktlint").get().toString())
                 .editorConfigOverride(
                   mapOf(
-                    "ktlint_function_naming_ignore_when_annotated_with" to "Composable"
-                  )
+                    "android" to true,
+                  ),
                 )
             }
             kotlinGradle {

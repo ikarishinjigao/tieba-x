@@ -19,19 +19,19 @@ fun TiebaxApp(
     modifier = Modifier
       .fillMaxSize(),
     verticalArrangement = Arrangement.Center,
-    horizontalAlignment = Alignment.CenterHorizontally
+    horizontalAlignment = Alignment.CenterHorizontally,
   ) {
     Button(
       onClick = {
         viewModel.testApiClient()
-      }
+      },
     ) {
       Text("test api client")
     }
     Button(
       onClick = {
         viewModel.testCuid()
-      }
+      },
     ) {
       Text("test cuid")
     }

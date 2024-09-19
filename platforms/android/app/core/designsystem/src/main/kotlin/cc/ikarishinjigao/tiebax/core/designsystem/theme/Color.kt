@@ -73,7 +73,7 @@ internal object TiebaxColor {
   val TextColorTertiaryLight = Color(206, 210, 214)
   val TextColorTertiaryDark = Color(44, 48, 52)
 
-  val BackgroundPrimaryLight= Color(254, 254, 254)
+  val BackgroundPrimaryLight = Color(254, 254, 254)
   val BackgroundPrimaryDark = Color(4, 4, 4)
   val BackgroundSecondaryLight = Color(250, 250, 250)
   val BackgroundSecondaryDark = Color(16, 16, 16)

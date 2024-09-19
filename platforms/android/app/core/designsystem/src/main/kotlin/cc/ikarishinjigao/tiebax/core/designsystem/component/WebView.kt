@@ -2,9 +2,7 @@ package cc.ikarishinjigao.tiebax.core.designsystem.component
 
 import android.graphics.Bitmap
 import android.view.ViewGroup.LayoutParams
-import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
@@ -15,7 +13,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -120,7 +117,7 @@ internal class InternalWebViewClient(
   override fun onPageStarted(
     view: WebView?,
     url: String?,
-    favicon: Bitmap?
+    favicon: Bitmap?,
   ) {
     super.onPageStarted(view, url, favicon)
     if (url.isNullOrEmpty()) return

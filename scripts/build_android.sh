@@ -55,7 +55,6 @@ run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libtiebax_c
 print_colored $YELLOW "Building for Android..."
 run_command cargo ndk \
   --manifest-path components/core/Cargo.toml \
-  -p $NDK_ANDROID_PLATFORM \
   -o $JNI_LIBS_DIR \
   -t armeabi-v7a \
   -t arm64-v8a \
