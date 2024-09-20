@@ -77,7 +77,6 @@ run_command cargo ndk \
   -o $JNI_LIBS_DIR \
   -t armeabi-v7a \
   -t arm64-v8a \
-  -t x86 \
   -t x86_64 \
   build --release
 
