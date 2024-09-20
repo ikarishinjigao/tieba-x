@@ -1,0 +1,10 @@
+--swiftversion 5.10
+--exclude fastlane, scripts, templates, **/Generated
+--indent 2
+--maxwidth 130
+--ifdef no-indent
+--disable unusedArguments
+--wraparguments before-first
+--wrapcollections before-first
+--extensionacl on-declarations
+--self init-only

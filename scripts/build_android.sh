@@ -2,6 +2,7 @@
 set -euo pipefail
 
 # Configuration
+OS=$(uname -s)
 BUILD_DIR=".build"
 ANDROID_APP_DIR="platforms/android/app"
 CORE_DIR="$ANDROID_APP_DIR/core"
@@ -41,6 +42,16 @@ run_command() {
   fi
 }
 
+# OS-specific configurations
+if [ "$OS" = "Darwin" ]; then
+  LIB_EXT="dylib"
+elif [ "$OS" = "Linux" ]; then
+  LIB_EXT="so"
+else
+  print_colored $RED "Unsupported operating system: $OS"
+  exit 1
+fi
+
 # Clean build directories
 print_colored $YELLOW "Cleaning build directories..."
 rm -rf $JNI_LIBS_DIR
@@ -48,8 +59,16 @@ rm -rf $JNI_LIBS_DIR
 # Build Rust project and generate bindings
 print_colored $YELLOW "Building Rust project and generating bindings..."
 run_command cargo build
-run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libtiebax_core.so --crate crypto -c components/crypto/uniffi.toml -l kotlin -o $CORE_DIR/crypto/src/main/kotlin
-run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libtiebax_core.so --crate network -c components/network/uniffi.toml -l kotlin -o $CORE_DIR/network/src/main/kotlin
+run_command cargo uniffi-bindgen generate \
+  --library $BUILD_DIR/debug/libtiebax_core.$LIB_EXT \
+  --crate crypto -c components/crypto/uniffi.toml \
+  -l kotlin \
+  -o $CORE_DIR/crypto/src/main/kotlin
+run_command cargo uniffi-bindgen generate \
+  --library $BUILD_DIR/debug/libtiebax_core.$LIB_EXT \
+  --crate network -c components/network/uniffi.toml \
+  -l kotlin \
+  -o $CORE_DIR/network/src/main/kotlin
 
 # Build for Android
 print_colored $YELLOW "Building for Android..."

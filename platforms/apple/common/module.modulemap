@@ -1,0 +1,6 @@
+framework module TiebaxFFI {
+  umbrella header "TiebaxFFI.h"
+
+  export *
+  module * { export * }
+}

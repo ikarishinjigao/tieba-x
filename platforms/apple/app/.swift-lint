@@ -1,0 +1,19 @@
+included:
+  - Sources
+  - Tests
+  - App
+
+line_length:
+  warning: 130
+  ignores_comments: true
+
+disabled_rules:
+  - nesting
+  - cyclomatic_complexity
+  - trailing_comma
+  - identifier_name
+  - file_length
+  - type_body_length
+  - function_body_length
+  - function_parameter_count
+  - opening_brace

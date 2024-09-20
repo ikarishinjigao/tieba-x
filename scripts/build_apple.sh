@@ -3,13 +3,12 @@ set -euo pipefail
 
 # Configuration
 export IPHONEOS_DEPLOYMENT_TARGET=12
-FRAMEWORK_NAME="TiebaxCore"
+FRAMEWORK_NAME="TiebaxFFI"
 RUST_PROJECT_ROOT="."
 APPLE_PLATFORM_DIR="platforms/apple"
-PACKAGE_DIR="$APPLE_PLATFORM_DIR/package"
-GEN_DIR="$APPLE_PLATFORM_DIR/gen"
-FRAMEWORKS_PATH="$PACKAGE_DIR/Frameworks"
-SOURCES_PATH="$PACKAGE_DIR/Sources"
+STAGING_DIR="$APPLE_PLATFORM_DIR/staging"
+FRAMEWORKS_PATH="$APPLE_PLATFORM_DIR/app/Frameworks"
+SOURCES_PATH="$APPLE_PLATFORM_DIR/app/Sources"
 COMMON_DIR="$APPLE_PLATFORM_DIR/common"
 BUILD_DIR=".build"
 
@@ -49,14 +48,14 @@ run_command() {
 
 # Clean build directories
 print_colored $YELLOW "Cleaning build directories..."
-rm -rf $GEN_DIR $FRAMEWORKS_PATH
-mkdir -p $GEN_DIR $FRAMEWORKS_PATH $SOURCES_PATH
+rm -rf $STAGING_DIR
+mkdir -p $STAGING_DIR
 
 # Build Rust project and generate bindings
 print_colored $YELLOW "Building Rust project and generating bindings..."
 run_command cargo build
-run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libcrypto.a -c components/crypto/uniffi.toml -l swift -o $GEN_DIR
-run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libnetwork.a -c components/network/uniffi.toml -l swift -o $GEN_DIR
+run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libcrypto.a -c components/crypto/uniffi.toml -l swift -o $STAGING_DIR
+run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libnetwork.a -c components/network/uniffi.toml -l swift -o $STAGING_DIR
 
 # Build for iOS and iOS Simulator
 print_colored $YELLOW "Building for iOS and iOS Simulator..."
@@ -65,7 +64,8 @@ run_command cargo build --release --target=aarch64-apple-ios-sim -p=core
 
 # Copy generated Swift files
 print_colored $YELLOW "Copying generated Swift files..."
-cp $GEN_DIR/*.swift $SOURCES_PATH/
+cp $STAGING_DIR/Crypto.swift $SOURCES_PATH/Crypto/
+cp $STAGING_DIR/Network.swift $SOURCES_PATH/Network/
 
 # Function to create framework
 create_framework() {
@@ -74,8 +74,10 @@ create_framework() {
   print_colored $YELLOW "Creating framework for $platform..."
   mkdir -p "$framework_path/Modules" "$framework_path/Headers"
   cp $BUILD_DIR/$platform/release/libtiebax_core.a "$framework_path/$FRAMEWORK_NAME"
-  cp $COMMON_DIR/{module.modulemap,$FRAMEWORK_NAME.h,Info.plist} "$framework_path"
-  cp $GEN_DIR/*FFI.h "$framework_path/Headers"
+  cp $COMMON_DIR/Info.plist "$framework_path"
+  cp $COMMON_DIR/module.modulemap "$framework_path/Modules"
+  cp $COMMON_DIR/$FRAMEWORK_NAME.h "$framework_path/Headers"
+  cp $STAGING_DIR/*FFI.h "$framework_path/Headers"
 }
 
 # Create frameworks
@@ -94,5 +96,6 @@ run_command xcodebuild -create-xcframework \
 print_colored $YELLOW "Cleaning up..."
 rm -rf "$FRAMEWORKS_PATH/aarch64-apple-ios"
 rm -rf "$FRAMEWORKS_PATH/aarch64-apple-ios-sim"
+rm -rf "$STAGING_DIR"
 
 print_colored $GREEN "Build completed successfully!"

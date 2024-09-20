@@ -1,5 +1,5 @@
 [bindings.swift]
-ffi_module_name = "TiebaxCore"
+ffi_module_name = "TiebaxFFI"
 ffi_module_filename = "CryptoFFI"
 generate_module_map = false
 

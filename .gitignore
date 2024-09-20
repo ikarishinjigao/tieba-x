@@ -5,6 +5,8 @@
 **/protos
 
 # platform
-platforms/apple
+platforms/apple/*
 platforms/android/*
+!platforms/apple/app
+!platforms/apple/common
 !platforms/android/app/
