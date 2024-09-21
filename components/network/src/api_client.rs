@@ -34,10 +34,7 @@ impl ApiClient {
     ) -> Result<GetThreadsResponse, Error> {
         self.request(request).await
     }
-}
 
-#[uniffi::export(async_runtime = "tokio")]
-impl ApiClient {
     pub async fn get_threads_personalized(
         &self,
         request: GetThreadsPersonalizedRequest,

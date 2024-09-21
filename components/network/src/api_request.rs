@@ -1,7 +1,7 @@
 use crate::protos::Error;
 use prost::Message;
 use reqwest::{
-    header::{HeaderMap, CACHE_CONTROL, CONNECTION, USER_AGENT},
+    header::{HeaderMap, ACCEPT_ENCODING, CACHE_CONTROL, CONNECTION, USER_AGENT},
     Method,
 };
 
@@ -32,6 +32,7 @@ where
         );
         headers.insert(CACHE_CONTROL, "no-cache".parse().unwrap());
         headers.insert(CONNECTION, "keep-alive".parse().unwrap());
+        headers.insert(ACCEPT_ENCODING, "gzip".parse().unwrap());
         headers
     }
 
