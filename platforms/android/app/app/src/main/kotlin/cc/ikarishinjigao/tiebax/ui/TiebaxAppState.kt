@@ -13,13 +13,12 @@ import cc.ikarishinjigao.tiebax.navigation.TopLevelDestination
 @Composable
 fun rememberTiebaxAppState(
   navController: NavHostController = rememberNavController(),
-): TiebaxAppState {
-  return remember(navController) {
+): TiebaxAppState =
+  remember(navController) {
     TiebaxAppState(
       navController = navController,
     )
   }
-}
 
 @Stable
 class TiebaxAppState(
@@ -31,14 +30,15 @@ class TiebaxAppState(
         findTopLevelDestination(destination = it)
       }
 
-  val topLevelDestinations: List<TopLevelDestination> = TopLevelDestination.entries
+  val topLevelDestinations: List<TopLevelDestination> =
+    TopLevelDestination.entries
 
   fun findTopLevelDestination(destination: NavDestination) =
     TopLevelDestination.entries.firstOrNull {
       destination.route == it.name
     }
 
-  fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) {
+  fun navigateToTopLevelDestination(topLevelDestination: TopLevelDestination) =
     navController.navigate(topLevelDestination.name) {
       popUpTo(navController.graph.findStartDestination().id) {
         saveState = true
@@ -46,5 +46,4 @@ class TiebaxAppState(
       launchSingleTop = true
       restoreState = true
     }
-  }
 }

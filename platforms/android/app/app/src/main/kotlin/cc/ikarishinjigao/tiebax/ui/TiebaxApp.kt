@@ -20,7 +20,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import cc.ikarishinjigao.tiebax.navigation.TiebaxNavHost
 
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TiebaxApp() {
@@ -36,9 +35,7 @@ fun TiebaxApp() {
             icon = { Icon(Icons.Default.Face, contentDescription = null) },
             label = { Text(topLevelDestination.title) },
             selected = appState.currentTopLevelDestination == topLevelDestination,
-            onClick = {
-              appState.navigateToTopLevelDestination(topLevelDestination)
-            },
+            onClick = { appState.navigateToTopLevelDestination(topLevelDestination) },
           )
         }
       }

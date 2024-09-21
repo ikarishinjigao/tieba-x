@@ -8,7 +8,7 @@ object SystemProperties {
 
   enum class Manufacturer {
     XIAOMI,
-    OTHER
+    OTHER,
   }
 
   private fun get(key: String, defaultValue: String = ""): String =
