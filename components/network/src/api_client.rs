@@ -1,6 +1,9 @@
 use crate::{
-    api_error::ApiError, api_request::ApiProtobufRequest, error::Error,
-    requests::GetThreadsRequest, responses::GetThreadsResponse,
+    api_error::ApiError,
+    api_request::ApiProtobufRequest,
+    error::Error,
+    requests::{GetThreadsPersonalizedRequest, GetThreadsRequest},
+    responses::{GetThreadsPersonalizedResponse, GetThreadsResponse},
 };
 use prost::Message;
 use reqwest::{
@@ -29,6 +32,16 @@ impl ApiClient {
         &self,
         request: GetThreadsRequest,
     ) -> Result<GetThreadsResponse, Error> {
+        self.request(request).await
+    }
+}
+
+#[uniffi::export(async_runtime = "tokio")]
+impl ApiClient {
+    pub async fn get_threads_personalized(
+        &self,
+        request: GetThreadsPersonalizedRequest,
+    ) -> Result<GetThreadsPersonalizedResponse, Error> {
         self.request(request).await
     }
 }
