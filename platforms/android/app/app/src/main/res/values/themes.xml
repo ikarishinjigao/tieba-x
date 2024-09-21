@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-  <style name="Theme.TiebaX" parent="android:Theme.Material.NoActionBar" />
+  <style name="NightAdjusted.Theme.TiebaX" parent="android:Theme.Material.Light.NoActionBar" />
+
+  <style name="Theme.TiebaX" parent="NightAdjusted.Theme.TiebaX">
+    <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+    <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+  </style>
 </resources>

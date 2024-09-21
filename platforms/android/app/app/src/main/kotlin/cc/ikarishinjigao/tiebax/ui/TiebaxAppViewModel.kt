@@ -9,7 +9,7 @@ import cc.ikarishinjigao.tiebax.core.network.ThreadSortType
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
-class TiebaAppViewModel(
+class TiebaxAppViewModel(
   private val apiClient: ApiClientInterface,
   private val cuid: CuidInterface,
 ) : ViewModel() {
