@@ -14,16 +14,21 @@ class TiebaxAppViewModel(
   private val cuid: CuidInterface,
 ) : ViewModel() {
   fun testApiClient() = viewModelScope.launch {
-    val result = apiClient.getThreads(
-      GetThreadsRequest(
-        forumName = "amd",
-        pageNumber = 1,
-        pageSize = 5,
-        sortType = ThreadSortType.CREATE_TIME,
-        isHighQualityThread = false,
-      ),
-    )
-    Timber.d("$result")
+    runCatching {
+      apiClient.getThreads(
+        GetThreadsRequest(
+          forumName = "amd",
+          pageNumber = 1,
+          pageSize = 5,
+          sortType = ThreadSortType.CREATE_TIME,
+          isHighQualityThread = false,
+        ),
+      )
+    }.onSuccess {
+      Timber.d("$it")
+    }.onFailure {
+      Timber.e(it)
+    }
   }
 
   fun testCuid() {

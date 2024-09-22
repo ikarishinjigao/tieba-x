@@ -21,7 +21,7 @@ fun createEnterTransition(
 ): EnterTransition {
   val forward = isForwardNavigation(initialState, targetState, appState)
   val offset = if (forward) TRANSITION_OFFSET else -TRANSITION_OFFSET
-  val easing = CubicBezierEasing(0.22f, 1f, 0.36f, 1f)
+  val easing = CubicBezierEasing(0.05f, 0.7f, 1f, 1f)
   return slideInHorizontally(
     animationSpec = tween(
       durationMillis = TRANSITION_DURATION / 2,
@@ -44,7 +44,7 @@ fun createExitTransition(
 ): ExitTransition {
   val forward = isForwardNavigation(initialState, targetState, appState)
   val offset = if (forward) -TRANSITION_OFFSET else TRANSITION_OFFSET
-  val easing = CubicBezierEasing(0.64f, 0f, 0.78f, 0f)
+  val easing = CubicBezierEasing(0.3f, 0f, 0.8f, 0.15f)
   return slideOutHorizontally(
     animationSpec = tween(
       durationMillis = TRANSITION_DURATION / 2,
