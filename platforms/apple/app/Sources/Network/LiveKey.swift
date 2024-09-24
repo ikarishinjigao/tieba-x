@@ -1,7 +1,7 @@
 import Dependencies
 
 final actor Actor {
-  let apiClient = ApiClient()
+  let client = ApiClient()
 }
 
 extension APIClient: DependencyKey {
@@ -9,7 +9,7 @@ extension APIClient: DependencyKey {
     let actor = Actor()
     return Self(
       getThreads: { request in
-        try await actor.apiClient.getThreads(request: request)
+        try await actor.client.getThreads(request: request)
       }
     )
   }()

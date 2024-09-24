@@ -1,7 +1,13 @@
 import Dependencies
 
-extension CuidManager: DependencyKey {
-  public static let liveValue = Self(
-    generateCuid: { Cuid().generateCuid(androidId: "52ee55117d525049") }
-  )
+extension IDManager: DependencyKey {
+  public static let liveValue = {
+    let manager = IdManager()
+    return Self(
+      generateUUID: { manager.generateUuid() },
+      generateAndroidID: { manager.generateAndroidId(seed: $0) },
+      generateCUID: { manager.generateCuid(androidId: $0) },
+      generateC3AID: { manager.generateC3Aid(androidId: $0, uuid: $1) }
+    )
+  }()
 }

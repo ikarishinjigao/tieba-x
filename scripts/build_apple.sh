@@ -59,8 +59,10 @@ run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libnetwork.
 
 # Build for iOS and iOS Simulator
 print_colored $YELLOW "Building for iOS and iOS Simulator..."
-run_command cargo build --release --target=aarch64-apple-ios -p=core
-run_command cargo build --release --target=aarch64-apple-ios-sim -p=core
+TARGETS=("x86_64-apple-ios" "aarch64-apple-ios" "aarch64-apple-ios-sim")
+for target in "${TARGETS[@]}"; do
+  run_command cargo build --release --target=$target -p=core
+done
 
 # Copy generated Swift files
 print_colored $YELLOW "Copying generated Swift files..."
@@ -73,7 +75,9 @@ create_framework() {
   local framework_path="$FRAMEWORKS_PATH/$platform/$FRAMEWORK_NAME.framework"
   print_colored $YELLOW "Creating framework for $platform..."
   mkdir -p "$framework_path/Modules" "$framework_path/Headers"
-  cp $BUILD_DIR/$platform/release/libtiebax_core.a "$framework_path/$FRAMEWORK_NAME"
+  if [ "$platform" != "aarch64_x86_64-ios-sim" ]; then
+    cp $BUILD_DIR/$platform/release/libtiebax_core.a "$framework_path/$FRAMEWORK_NAME"
+  fi
   cp $COMMON_DIR/Info.plist "$framework_path"
   cp $COMMON_DIR/module.modulemap "$framework_path/Modules"
   cp $COMMON_DIR/$FRAMEWORK_NAME.h "$framework_path/Headers"
@@ -81,21 +85,34 @@ create_framework() {
 }
 
 # Create frameworks
-create_framework "aarch64-apple-ios"
-create_framework "aarch64-apple-ios-sim"
+for target in "${TARGETS[@]}"; do
+  create_framework $target
+done
+
+# Create combined framework for iOS Simulator
+print_colored $YELLOW "Creating combined framework for iOS Simulator..."
+COMBINED_FRAMEWORK_PLATFORM="aarch64_x86_64-ios-sim"
+COMBINED_FRAMEWORK_PATH="$FRAMEWORKS_PATH/$COMBINED_FRAMEWORK_PLATFORM/$FRAMEWORK_NAME.framework"
+create_framework $COMBINED_FRAMEWORK_PLATFORM
+lipo -create \
+  "$FRAMEWORKS_PATH/x86_64-apple-ios/$FRAMEWORK_NAME.framework/$FRAMEWORK_NAME" \
+  "$FRAMEWORKS_PATH/aarch64-apple-ios-sim/$FRAMEWORK_NAME.framework/$FRAMEWORK_NAME" \
+  -output "$COMBINED_FRAMEWORK_PATH/$FRAMEWORK_NAME"
 
 # Create XCFramework
 print_colored $YELLOW "Creating XCFramework..."
 rm -rf "$FRAMEWORKS_PATH/$FRAMEWORK_NAME.xcframework"
 run_command xcodebuild -create-xcframework \
   -framework "$FRAMEWORKS_PATH/aarch64-apple-ios/$FRAMEWORK_NAME.framework" \
-  -framework "$FRAMEWORKS_PATH/aarch64-apple-ios-sim/$FRAMEWORK_NAME.framework" \
+  -framework "$FRAMEWORKS_PATH/aarch64_x86_64-ios-sim/$FRAMEWORK_NAME.framework" \
   -output "$FRAMEWORKS_PATH/$FRAMEWORK_NAME.xcframework"
 
 # Clean up
 print_colored $YELLOW "Cleaning up..."
+rm -rf "$FRAMEWORKS_PATH/x86_64-apple-ios"
 rm -rf "$FRAMEWORKS_PATH/aarch64-apple-ios"
 rm -rf "$FRAMEWORKS_PATH/aarch64-apple-ios-sim"
+rm -rf "$FRAMEWORKS_PATH/aarch64_x86_64-ios-sim"
 rm -rf "$STAGING_DIR"
 
 print_colored $GREEN "Build completed successfully!"

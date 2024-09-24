@@ -14,7 +14,7 @@ public struct AppReducer {
     case testApiClient
   }
 
-  @Dependency(\.cuidManager) var cuidManager
+  @Dependency(\.idManager) var idManager
   @Dependency(\.apiClient) var apiClient
 
   public init() {}
@@ -26,13 +26,19 @@ public struct AppReducer {
   func core(into state: inout State, action: Action) -> Effect<Action> {
     switch action {
     case .testCuid:
-      .run { send in
-        let result = cuidManager.generateCuid()
-        print(result)
+      .run { _ in
+        let seed = UInt64.random(in: 0 ... UInt64.max)
+        let uuid = idManager.generateUUID()
+        let androidID = idManager.generateAndroidID(seed: seed)
+        let cuid = idManager.generateCUID(androidID: androidID)
+        let c3AID = idManager.generateC3AID(androidID: androidID, uuid: uuid)
+        print(androidID)
+        print(cuid)
+        print(c3AID)
       }
 
     case .testApiClient:
-      .run { send in
+      .run { _ in
         do {
           let result = try await apiClient.getThreads(
             request: .init(
