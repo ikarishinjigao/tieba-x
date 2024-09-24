@@ -53,7 +53,7 @@ mkdir -p $STAGING_DIR
 
 # Build Rust project and generate bindings
 print_colored $YELLOW "Building Rust project and generating bindings..."
-run_command cargo build
+run_command cargo build -p=core
 run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libcrypto.a -c components/crypto/uniffi.toml -l swift -o $STAGING_DIR
 run_command cargo uniffi-bindgen generate --library $BUILD_DIR/debug/libnetwork.a -c components/network/uniffi.toml -l swift -o $STAGING_DIR
 

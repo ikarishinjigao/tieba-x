@@ -3,7 +3,7 @@ package cc.ikarishinjigao.tiebax
 object Version {
   object Android {
     const val COMPILE_SDK = 35
-    const val MIN_SDK = 21
+    const val MIN_SDK = 28
     const val TARGET_SDK = 35
   }
 

@@ -58,7 +58,7 @@ rm -rf $JNI_LIBS_DIR
 
 # Build Rust project and generate bindings
 print_colored $YELLOW "Building Rust project and generating bindings..."
-run_command cargo build
+run_command cargo build -p=core
 run_command cargo uniffi-bindgen generate \
   --library $BUILD_DIR/debug/libtiebax_core.$LIB_EXT \
   --crate crypto -c components/crypto/uniffi.toml \
@@ -78,6 +78,6 @@ run_command cargo ndk \
   -t armeabi-v7a \
   -t arm64-v8a \
   -t x86_64 \
-  build --release
+  build --release -p=core
 
 print_colored $GREEN "Build completed successfully!"
